@@ -1,8 +1,5 @@
 package Utils;
 
-import java.util.Calendar;
-import java.util.Date;
-
 public class SqlString {
     public static String insertuser(int id,String name,int isSingle,int onLine)//插入用户
     {
@@ -20,23 +17,22 @@ public class SqlString {
     }
     public static String insertchat(long time,int from,int isSingleCast,int to,int isFile,String msg)//插入聊天信息
     {
-        //long time = new Date().getTime();
         String sql = "INSERT INTO CHAT (POSTTIME,FROMUSER,ISSINGLECAST,TOUSER,ISFILE,MESSAGE) VALUES ("+time+","+from+","+isSingleCast+","+to+","+isFile+",'"+msg+"');";
         return sql;
     }
     public static String updateuser(int id,String name,int onLine)//更新用户信息
     {
-        String sql = "UPDATE USER SET NAME='"+name+"',ISONLINE="+onLine+" WHERE ID = "+id+";";
+        String sql = "UPDATE USER SET NAME='"+name+"',ISONLINE="+onLine+" WHERE USER.ID = "+id+";";
         return sql;
     }
     public static String deleterelation(int firstid,int secondid)//删除用户好友关系
     {
-        String sql = "DELETE FROM RELATION WHERE FIRSTID="+firstid+" AND SECONDID="+secondid+";";
+        String sql = "DELETE FROM RELATION WHERE RELATION.FIRSTID="+firstid+" AND RELATION.SECONDID="+secondid+";";
         return sql;
     }
     public static String selectchat(int id)//筛选指定用户的聊天记录
     {
-        String sql = "SELECT * FROM CHAT WHERE CHAT.FROMUSER = "+id+" OR CHAT.TOUSER = "+id+" ORDER BY POSTTIME DESC;";
+        String sql = "SELECT * FROM CHAT WHERE CHAT.FROMUSER = "+id+" OR CHAT.TOUSER = "+id+" ORDER BY POSTTIME;";
         return sql;
     }
     public static String selectrelation(int id)//筛选指定用户的好友
@@ -49,9 +45,14 @@ public class SqlString {
         String sql = "SELECT * FROM USER WHERE USER.ID IN (SELECT RELATION.SECONDID FROM RELATION WHERE RELATION.FIRSTID = "+id+");";
         return sql;
     }
+    public static String isuserexist(int id)//判断某个用户是否存在
+    {
+        String sql = "SELECT USER.ID FROM USER WHERE USER.ID = "+id+";";
+        return sql;
+    }
     public static void main(String[] args)
     {
         //System.out.println(SqlString.insertchat(2,0,1,0,"nihao a"));
-        System.out.println(SqlString.selectchat(2));
+        System.out.println(SqlString.updateuser(2,"MIKE",0));
     }
 }
