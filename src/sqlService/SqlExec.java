@@ -48,13 +48,5 @@ public class SqlExec extends Thread{
     public static void main(String[] args)
     {
         new SqlExec().start();
-        SqlExec.sqlQueue.add(SqlString.insertchat(1,1,2,0,"nihaome"));
-        SqlExec.sqlQueue.add(SqlString.insertchat(1,1,2,0,"nifde"));
-        SqlExec.sqlQueue.add(SqlString.insertchat(1,1,2,0,"nihaofge"));
-        SqlExec.sqlQueue.add(SqlString.insertchat(1,1,2,0,"nifdome"));
-        SqlExec.sqlQueue.add(SqlString.insertchat(1,1,2,0,"nsdfhaome"));
-        SqlExec.sqlQueue.add(SqlString.insertchat(1,1,2,0,"nsfdaome"));
-        SqlExec.sqlQueue.add(SqlString.insertchat(1,1,2,0,"nfdgome"));
-        SqlExec.sqlQueue.add(SqlString.insertchat(1,1,2,0,"nihfdgme"));
     }
 }

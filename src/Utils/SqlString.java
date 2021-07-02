@@ -18,9 +18,9 @@ public class SqlString {
     {
         return null;
     }
-    public static String insertchat(int from,int isSingleCast,int to,int isFile,String msg)//插入聊天信息
+    public static String insertchat(long time,int from,int isSingleCast,int to,int isFile,String msg)//插入聊天信息
     {
-        long time = new Date().getTime();
+        //long time = new Date().getTime();
         String sql = "INSERT INTO CHAT (POSTTIME,FROMUSER,ISSINGLECAST,TOUSER,ISFILE,MESSAGE) VALUES ("+time+","+from+","+isSingleCast+","+to+","+isFile+",'"+msg+"');";
         return sql;
     }
@@ -48,7 +48,7 @@ public class SqlString {
     }
     public static void main(String[] args)
     {
-        System.out.println(SqlString.insertchat(2,0,1,0,"nihao a"));
+        //System.out.println(SqlString.insertchat(2,0,1,0,"nihao a"));
         System.out.println(SqlString.insertuser(2,"wenchih",1,1));
         System.out.println(SqlString.insertrelation(2,1));
         System.out.println(SqlString.updateuser(2,"BOB1",0));

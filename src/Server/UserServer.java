@@ -168,53 +168,67 @@ class Client extends Thread
         ResultSet rs = null;
 
         rs = SqlSelect.Select(SqlString.selectchat(),userid);
-
-        try {
-            dout.writeUTF("CHAT");
-            dout.flush();
-            while(rs.next())
-            {
-                dout.writeInt(rs.getInt(2));//时间
+        while(true)
+        {
+            try {
+                if(!rs.next())
+                {
+                    dout.writeInt(0);//已结束
+                    break;
+                }
+                else{dout.writeInt(-1);}
+                dout.writeLong(rs.getLong(2));//时间
                 dout.writeInt(rs.getInt(3));//from
                 dout.writeInt(rs.getInt(4));//是否单聊
                 dout.writeInt(rs.getInt(5));//to
                 dout.writeInt(rs.getInt(6));//是否为文件
                 dout.writeUTF(rs.getString(7));//消息或路径
                 dout.flush();
-            }
-        }catch (SQLException | IOException e)
-        {
-            e.printStackTrace();
-        }
-        rs = SqlSelect.Select(SqlString.selectrelation(),userid);
-        try {
-            dout.writeUTF("RELATION");
-            dout.flush();
-            while(rs.next())
+            }catch (SQLException | IOException e)
             {
+                e.printStackTrace();
+            }
+        }
+
+        rs = SqlSelect.Select(SqlString.selectrelation(),userid);
+        while(true)
+        {
+            try {
+                if(!rs.next())
+                {
+                    dout.writeInt(0);
+                    break;
+                }
+                else {dout.writeInt(-1);}
                 dout.writeInt(rs.getInt(1));//第一好友
                 dout.writeInt(rs.getInt(2));//第二好友
                 dout.flush();
-            }
-        }catch (SQLException | IOException e)
-        {
-            e.printStackTrace();
-        }
-        rs = SqlSelect.Select(SqlString.selectuser(),userid);
-        try {
-            dout.writeUTF("USER");
-            dout.flush();
-            while(rs.next())
+            }catch (SQLException | IOException e)
             {
+                e.printStackTrace();
+            }
+        }
+
+        rs = SqlSelect.Select(SqlString.selectuser(),userid);
+        while(true)
+        {
+            try {
+                if(!rs.next())
+                {
+                    dout.writeInt(0);
+                    break;
+                }
+                else{dout.writeInt(-1);}
                 dout.writeInt(rs.getInt(1));//用户id
                 dout.writeUTF(rs.getString(2));//用户名称
                 dout.writeInt(rs.getInt(3));//是否为单人
                 dout.writeInt(rs.getInt(4));//是否在线
                 dout.flush();
+            }catch (SQLException | IOException e)
+            {
+                e.printStackTrace();
             }
-        }catch (SQLException | IOException e)
-        {
-            e.printStackTrace();
         }
+        System.out.println("数据库同步完成！！！");
     }
 }

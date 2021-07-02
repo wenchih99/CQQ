@@ -2,9 +2,12 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 import Utils.*;
 import sqlService.SqlExec;
+import sqlService.SqlSelect;
 
 public class UserClient {
     private Socket s;
@@ -87,7 +90,40 @@ public class UserClient {
     }
     public void DBSync()
     {
+        int msg;
+        while(true)
+        {
+            try {
+                if((msg=din.readInt())==0) { break; }
+                SqlExec.addSql(SqlString.insertchat(din.readLong(),din.readInt(),din.readInt(),din.readInt(),din.readInt(),din.readUTF()));
+            }catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
 
+        while(true)
+        {
+            try {
+                if((msg=din.readInt())==0) { break; }
+                SqlExec.addSql(SqlString.insertrelation(din.readInt(),din.readInt()));
+            }catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        while(true)
+        {
+            try {
+                if((msg=din.readInt())==0) { break; }
+                SqlExec.addSql(SqlString.insertuser(din.readInt(),din.readUTF(),din.readInt(),din.readInt()));
+            }catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("数据库同步完成！！！");
     }
     public static void main(String[] args)
     {
