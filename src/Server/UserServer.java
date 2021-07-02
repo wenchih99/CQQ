@@ -167,7 +167,7 @@ class Client extends Thread
         * */
         ResultSet rs = null;
 
-        rs = SqlSelect.Select(SqlString.selectchat(),userid);
+        rs = SqlSelect.Select(SqlString.selectchat(userid),0);
         while(true)
         {
             try {
@@ -190,7 +190,7 @@ class Client extends Thread
             }
         }
 
-        rs = SqlSelect.Select(SqlString.selectrelation(),userid);
+        rs = SqlSelect.Select(SqlString.selectrelation(userid),0);
         while(true)
         {
             try {
@@ -209,7 +209,7 @@ class Client extends Thread
             }
         }
 
-        rs = SqlSelect.Select(SqlString.selectuser(),userid);
+        rs = SqlSelect.Select(SqlString.selectuser(userid),0);
         while(true)
         {
             try {

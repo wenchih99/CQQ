@@ -34,24 +34,24 @@ public class SqlString {
         String sql = "DELETE FROM RELATION WHERE FIRSTID="+firstid+" AND SECONDID="+secondid+";";
         return sql;
     }
-    public static String selectchat()
+    public static String selectchat(int id)//筛选指定用户的聊天记录
     {
-        return "select * from chat;";
+        String sql = "SELECT * FROM CHAT WHERE CHAT.FROMUSER = "+id+" OR CHAT.TOUSER = "+id+" ORDER BY POSTTIME DESC;";
+        return sql;
     }
-    public static String selectrelation()
+    public static String selectrelation(int id)//筛选指定用户的好友
     {
-        return "select * from chat;";
+        String sql = "SELECT * FROM RELATION WHERE RELATION.FIRSTID = "+id+";";
+        return sql;
     }
-    public static String selectuser()
+    public static String selectuser(int id)//筛选指定用户的好友的信息
     {
-        return "select * from chat;";
+        String sql = "SELECT * FROM USER WHERE USER.ID IN (SELECT RELATION.SECONDID FROM RELATION WHERE RELATION.FIRSTID = "+id+");";
+        return sql;
     }
     public static void main(String[] args)
     {
         //System.out.println(SqlString.insertchat(2,0,1,0,"nihao a"));
-        System.out.println(SqlString.insertuser(2,"wenchih",1,1));
-        System.out.println(SqlString.insertrelation(2,1));
-        System.out.println(SqlString.updateuser(2,"BOB1",0));
-        System.out.println(SqlString.deleterelation(2,1));
+        System.out.println(SqlString.selectchat(2));
     }
 }
