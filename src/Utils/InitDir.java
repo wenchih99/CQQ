@@ -13,16 +13,14 @@ public class InitDir {
      * ----filerecv
      * ----chatinfo
      * */
-    public InitDir(String username)
+    public InitDir(int userid)
     {
         File now = new File("my_data");
         if(!now.exists()) { now.mkdir(); }
-        now = new File(now.getPath()+File.separator+username);
+        now = new File(now.getPath()+File.separator+userid);
         if(!now.exists()) { now.mkdir(); }
         now = new File(now.getPath()+File.separator+"filerecv");
         if(!now.exists()) { now.mkdir(); }
-        now = new File(now.getParent()+File.separator+"chatinfo");
-        if(!now.exists()) { now.mkdir(); }
     }
-    public static void main(String[] args) throws IOException {new InitDir("wenchih");}
+    public static void main(String[] args) throws IOException {new InitDir(1);}
 }

@@ -13,7 +13,7 @@ public class FileClient extends Thread{
     private DataOutputStream dout;
     private String cmd;
     private String[] msg;
-    private String filename;
+    private String userid;
     public FileClient(String cmd)
     {
         this.cmd = cmd;
@@ -30,11 +30,12 @@ public class FileClient extends Thread{
     {
         try
         {
+            //发给服务器
             dout=new DataOutputStream(socket.getOutputStream());
-            dout.writeUTF("download::wenchih::algorithm.jpeg");
+            dout.writeUTF("download::"+userid+"::algorithm.jpeg");
             dout.flush();
+            //客户端启动收发文件服务
             msg = cmd.split("::");
-            //filename = din.readUTF();
             if(msg[0].equals("download")) { new DownloadFile(socket,msg[1]); }
             else if(msg[0].equals("upload")) { new UploadFile(socket,msg[1]); }
             socket.close();

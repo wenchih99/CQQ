@@ -4,33 +4,41 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 import Utils.*;
+import sqlService.SqlQueue;
 
 public class UserClient {
     private Socket s;
     private DataInputStream din;
     private DataOutputStream dout;
-    private String id_name;
+    private int userid;
+    private String username;
     private static Scanner sc = new Scanner(System.in);
-    private String msgin;
-    private String msgout;
+    private String msgin;//收到的msg消息
+    private String msgout;//发出的msg消息
     public UserClient()
     {
-
+        System.out.print("请输入用户id: ");
+        userid = sc.nextInt();
         System.out.print("请输入用户名: ");
-        id_name = sc.next();
+        username = sc.next();
         try {
             //8.130.52.255
             s = new Socket("8.130.52.255",9999);
             System.out.println("服务器已连接");
             din = new DataInputStream(s.getInputStream());
             dout = new DataOutputStream(s.getOutputStream());
-            dout.writeUTF(id_name);//发送用户名
+            dout.writeInt(userid);//发送用户id
+            dout.writeUTF(username);//发送用户名
             dout.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        new RecvMsg().start();
-        new SendMsg().start();
+        new InitDir(userid);//初始化用户目录
+        new SqlQueue(userid).start();//启动sql执行队列服务
+        new InitDB("client");//初始化DB
+        DBSync();//与服务器进行同步
+        new RecvMsg().start();//启动接收消息线程
+        new SendMsg().start();//启动发送消息线程
     }
     class RecvMsg extends Thread
     {//接受消息线程
@@ -58,9 +66,13 @@ public class UserClient {
 
                     //System.out.println(msgout);
                     if(msgout.equals("")) { continue; }//防止发送空消息
-                    if(msgout.equals("upload"))
+                    if(msgout.equals("upload"))//上传文件
                     {
                         new UploadFile(s,sc.next());
+                    }
+                    else if(msgout.equals("download"))//下载文件
+                    {
+
                     }
                     else
                     {
@@ -72,6 +84,10 @@ public class UserClient {
                 e.printStackTrace();
             }
         }
+    }
+    public void DBSync()
+    {
+
     }
     public static void main(String[] args)
     {
