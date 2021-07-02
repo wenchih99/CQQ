@@ -1,6 +1,6 @@
 package Utils;
 
-import sqlService.SqlQueue;
+import sqlService.SqlExec;
 
 public class InitDB {
     private String sql1 = "CREATE TABLE CHAT(SERIALNUM INTEGER PRIMARY KEY   AUTOINCREMENT,POSTTIME INTEGER NOT NULL,FROMUSER TEXT NOT NULL,ISSINGLECAST INTEGER NOT NULL,TOUSER TEXT NOT NULL,ISFILE INTEGER NOT NULL,MESSAGE TEXT NOT NULL);";
@@ -10,14 +10,15 @@ public class InitDB {
     {
         if(target.equals("server"))
         {
-            SqlQueue.addSql(sql1);
-            SqlQueue.addSql(sql2);
-            SqlQueue.addSql(sql3);
+            SqlExec.addSql(sql1);
+            SqlExec.addSql(sql2);
+            SqlExec.addSql(sql3);
         }
         else if(target.equals("client"))
         {
-            SqlQueue.addSql(sql1);
-            SqlQueue.addSql(sql2);
+            SqlExec.addSql(sql1);
+            SqlExec.addSql(sql2);
+            SqlExec.addSql(sql3);
         }
     }
 }

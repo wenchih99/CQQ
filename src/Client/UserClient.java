@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 import Utils.*;
-import sqlService.SqlQueue;
+import sqlService.SqlExec;
 
 public class UserClient {
     private Socket s;
@@ -34,7 +34,7 @@ public class UserClient {
             e.printStackTrace();
         }
         new InitDir(userid);//初始化用户目录
-        new SqlQueue(userid).start();//启动sql执行队列服务
+        new SqlExec(userid).start();//启动sql执行队列服务
         new InitDB("client");//初始化DB
         DBSync();//与服务器进行同步
         new RecvMsg().start();//启动接收消息线程

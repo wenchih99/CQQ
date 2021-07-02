@@ -3,12 +3,15 @@ package Server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Scanner;
 import Utils.*;
-import sqlService.SqlQueue;
+import sqlService.SqlExec;
+import sqlService.SqlSelect;
 
 public class UserServer {
     public static Dictionary<Integer,Client> socklist;
@@ -17,7 +20,7 @@ public class UserServer {
         System.out.println("会话服务器启动成功,端口为:"+ss.getLocalPort());
         socklist = new Hashtable<>();
         new InitDir(0);
-        new SqlQueue(0).start();//sql语句执行队列
+        new SqlExec(0).start();//sql语句执行队列
         new InitDB("server");
         while (true)
         {
@@ -95,21 +98,28 @@ class Client extends Thread
                 if(msg[0].equals("upload"))
                 {
                     //要求向服务器上传文件
+                    //无论给谁发，都加到个人仓库
                     //upload::path
                 }
                 else if(msg[0].equals("download"))
                 {
                     //要求从服务器下载文件
+                    //从指定仓库下载文件(指定仓库指的是上传文件的用户的仓库)
                     //download::path
                 }
                 else if(msg[0].equals("adduser"))
                 {
                     //添加好友
+                    //双向添加用户
                     //adduser::userid
                 }
                 else if(msg[0].equals("deleteuser"))
                 {
                     //删除好友
+                    /*
+                    一是删除我方好友
+                    二是删除对方好友
+                     */
                     //deleteuser::userid
                 }
                 else if(msg[0].equals("updateusername"))
@@ -119,6 +129,7 @@ class Client extends Thread
                 }
                 else if((toClient=UserServer.socklist.get(msg[0]))!=null)
                 {
+                    //给用户或组发送消息
                     System.out.println(username+" to "+toClient.username+":"+msg[1]);
                     toClient.sendMsg(username,msg[1]);
                 }
@@ -149,6 +160,61 @@ class Client extends Thread
     }
     public void DBSync()
     {
+        /*一、该用户发送的消息
+        *    该用户收到的消息
+        * 二、该用户的好友
+        * 三、该用户好友的信息
+        * */
+        ResultSet rs = null;
 
+        rs = SqlSelect.Select(SqlString.selectchat(),userid);
+
+        try {
+            dout.writeUTF("CHAT");
+            dout.flush();
+            while(rs.next())
+            {
+                dout.writeInt(rs.getInt(2));//时间
+                dout.writeInt(rs.getInt(3));//from
+                dout.writeInt(rs.getInt(4));//是否单聊
+                dout.writeInt(rs.getInt(5));//to
+                dout.writeInt(rs.getInt(6));//是否为文件
+                dout.writeUTF(rs.getString(7));//消息或路径
+                dout.flush();
+            }
+        }catch (SQLException | IOException e)
+        {
+            e.printStackTrace();
+        }
+        rs = SqlSelect.Select(SqlString.selectrelation(),userid);
+        try {
+            dout.writeUTF("RELATION");
+            dout.flush();
+            while(rs.next())
+            {
+                dout.writeInt(rs.getInt(1));//第一好友
+                dout.writeInt(rs.getInt(2));//第二好友
+                dout.flush();
+            }
+        }catch (SQLException | IOException e)
+        {
+            e.printStackTrace();
+        }
+        rs = SqlSelect.Select(SqlString.selectuser(),userid);
+        try {
+            dout.writeUTF("USER");
+            dout.flush();
+            while(rs.next())
+            {
+                dout.writeInt(rs.getInt(1));//用户id
+                dout.writeUTF(rs.getString(2));//用户名称
+                dout.writeInt(rs.getInt(3));//是否为单人
+                dout.writeInt(rs.getInt(4));//是否在线
+                dout.flush();
+            }
+        }catch (SQLException | IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }
