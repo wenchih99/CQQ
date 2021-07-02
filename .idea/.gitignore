@@ -1,5 +1,5 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-my_data/*
-out/*
+my_data
+out
