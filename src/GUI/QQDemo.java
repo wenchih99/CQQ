@@ -11,11 +11,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -105,7 +101,15 @@ public class QQDemo extends JFrame{
                 String msg = text_send.getText();
                 text_send.setText("");
                 if(msg.equals("")){System.out.println("禁止发送空消息！");return;}
-                client.msgout = nowid+"::"+msg;
+                if(label_issingle.getText().equals("group"))
+                {
+                    msg="group::"+nowid+"::"+msg;
+                }
+                else
+                {
+                    msg=nowid+"::"+msg;
+                }
+                client.msgout = msg;
                 client.SendMsg();
                 bt_sendmsg.validate();
             }
@@ -147,18 +151,44 @@ public class QQDemo extends JFrame{
         addgroup.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                String msg = text_common.getText();
+                client.msgout="addgroup::"+msg;
+                client.SendMsg();
+                text_common.setText("");
+                text_common.validate();
+                addgroup.validate();
+            }
+        });
+        buildgroup.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String msg="buildgroup::"+text_groupid.getText()+"::"+text_groupname.getText();
+                client.msgout=msg;
+                client.SendMsg();
+                text_groupid.setText("");
+                text_groupname.setText("");
+                text_groupid.validate();
+                text_groupname.validate();
+                buildgroup.validate();
             }
         });
         deluser.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //先选中再删除
-                client.msgout="deleteuser::"+nowid;
+                if(label_issingle.getText().equals("group"))
+                {
+                    client.msgout="deletegroup::"+nowid;
+                }
+                else
+                {
+                    client.msgout="deleteuser::"+nowid;
+                }
                 client.SendMsg();
                 //本地删除好友直接在这删除了
                 String msg = "deleteuser::"+nowid+"::"+nowname;
                 JUtils.updateuser(msg.split("::"));
+                deluser.validate();
             }
         });
         modifyname.addActionListener(new ActionListener() {
@@ -171,6 +201,7 @@ public class QQDemo extends JFrame{
                 client.SendMsg();
                 label_name.setText("网名:"+msg);
                 label_name.validate();
+                modifyname.validate();
             }
         });
 

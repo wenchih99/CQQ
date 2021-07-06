@@ -82,7 +82,7 @@ public class JUtils {
         if(Integer.parseInt(msg[1])!=QQDemo.me.userid)
         {
             QQDemo.me.panel.add(GUIutils.StringToJlabel(Long.parseLong(msg[0]),false));
-            QQDemo.me.panel.add(GUIutils.StringToJlabel(msg[5],false));
+            QQDemo.me.panel.add(GUIutils.StringToJlabel(msg[1]+"::"+msg[5],false));
             if(msg[4].equals("1"))//是否为文件
             {
                 JPanel jPanel = new JPanel(new BorderLayout());
@@ -93,7 +93,7 @@ public class JUtils {
         else
         {
             QQDemo.me.panel.add(GUIutils.StringToJlabel(Long.parseLong(msg[0]),true));
-            QQDemo.me.panel.add(GUIutils.StringToJlabel(msg[1]+"::"+msg[5],true));
+            QQDemo.me.panel.add(GUIutils.StringToJlabel(msg[5],true));
             if(msg[4].equals("1"))//是否为文件
             {
                 JPanel jPanel = new JPanel(new BorderLayout());
@@ -143,7 +143,16 @@ public class JUtils {
         else if(msg[0].equals("adduser"))
         {
             //adduser::id::name
-            QQDemo.me.friends.put(msg[2],msg[1]+"::"+1+"::"+1);
+            QQDemo.me.friends.put(msg[2],msg[1]+"::1");
+            DefaultListModel<String> listModel= (DefaultListModel<String>) QQDemo.me.list_friend.getModel();
+            listModel.addElement(msg[2]);
+            QQDemo.me.list_friend.setSelectedIndex(-1);
+            QQDemo.me.list_friend.repaint();
+        }
+        else if(msg[0].equals("addgroup"))
+        {
+            //addgroup::id::name
+            QQDemo.me.friends.put(msg[2],msg[1]+"::0");
             DefaultListModel<String> listModel= (DefaultListModel<String>) QQDemo.me.list_friend.getModel();
             listModel.addElement(msg[2]);
             QQDemo.me.list_friend.setSelectedIndex(-1);
@@ -174,8 +183,5 @@ public class JUtils {
             throwables.printStackTrace();
         }
     }
-    public static void UpdateFriends()//更新好友列表
-    {
 
-    }
 }

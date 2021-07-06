@@ -76,6 +76,12 @@ public class UserClient {
                         SqlExec.addSql(SqlString.updateuser(Integer.parseInt(msg[1]),0));
                         JUtils.updateuser(msg);
                     }
+                    else if(msg[0].equals("addgroup"))
+                    {
+                        //addgroup::id::name
+                        SqlExec.addSql(SqlString.insertuser(Integer.parseInt(msg[1]),msg[2],0,1));
+                        JUtils.updateuser(msg);
+                    }
                     else if(msg[0].equals("group"))
                     {
                         //group::fromid::toid::isfile::msg::time
@@ -150,7 +156,9 @@ public class UserClient {
             else if(msg[0].equals("buildgroup"))
             {
                 //buildgroup::groupid::groupname
+                SqlExec.addSql(SqlString.insertrelation(userid,Integer.parseInt(msg[1])));
                 SqlExec.addSql(SqlString.insertuser(Integer.parseInt(msg[1]),msg[2],0,1));
+                JUtils.updateuser(("addgroup::"+msg[1]+"::"+msg[2]).split("::"));
                 dout.writeUTF(msgout);
                 dout.flush();
             }
@@ -180,6 +188,14 @@ public class UserClient {
             }
             else if(msg[0].equals("deleteuser"))
             {
+                SqlExec.addSql(SqlString.deleterelation(userid,Integer.parseInt(msg[1])));
+                dout.writeUTF(msgout);
+                dout.flush();
+            }
+            else if(msg[0].equals("deletegroup"))
+            {
+                //deletegroup::id
+                //本地信息直接在按钮处删除
                 SqlExec.addSql(SqlString.deleterelation(userid,Integer.parseInt(msg[1])));
                 dout.writeUTF(msgout);
                 dout.flush();
@@ -247,9 +263,5 @@ public class UserClient {
             }
         }
         System.out.println("数据库同步完成！！！");
-    }
-    public static void main(String[] args)
-    {
-        //new UserClient();
     }
 }

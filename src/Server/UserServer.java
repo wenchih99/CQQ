@@ -122,6 +122,11 @@ class Client extends Thread
                         //同步好友信息
                         dout.writeUTF(msg[0]+"::"+toClient.userid+"::"+toClient.username);
                     }
+                }else if(msg[0].equals("deletegroup"))
+                {
+                    //deletegroup::id
+                    //只需在服务器中删除即可
+                    SqlExec.addSql(SqlString.deleterelation(userid, Integer.parseInt(msg[1])));
                 } else if (msg[0].equals("deleteuser")) {
                     //删除好友
                     //双向删除好友
@@ -135,10 +140,12 @@ class Client extends Thread
                 }else if(msg[0].equals("buildgroup"))
                 {
                     //buildgroup::id::name
+                    SqlExec.addSql(SqlString.insertrelation(userid, Integer.parseInt(msg[1])));
                     SqlExec.addSql(SqlString.insertuser(Integer.parseInt(msg[1]),msg[2],0,1));
                 } else if(msg[0].equals("addgroup"))
                 {
                     //addgroup::id
+                    //请求加入群组
                     SqlExec.addSql(SqlString.insertrelation(userid, Integer.parseInt(msg[1])));
                     syncGroupMsg(Integer.parseInt(msg[1]));//同步群消息
                 } else if (msg[0].equals("updateusername")) {
@@ -199,6 +206,19 @@ class Client extends Thread
     public void syncGroupMsg(int groupid)
     {
         ResultSet rs = null;
+        //同步群信息
+        rs = SqlExec.Select(SqlString.selectgroupinfo(groupid));
+        try {
+            //group::fromid::toid::isfile::msg::time
+            while(rs.next())
+            {
+                //id::name::0::1
+                sendMsg("addgroup::"+rs.getInt(1)+"::"+rs.getString(2));
+            }
+        }catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
         //同步聊天记录
         rs = SqlExec.Select(SqlString.selectchat(groupid));
         try {

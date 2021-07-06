@@ -11,10 +11,6 @@ public class SqlString {
         String sql = "INSERT INTO RELATION (FIRSTID,SECONDID) VALUES ("+firstid+","+secondid+");";
         return sql;
     }
-    public static String insertfile()//插入文件
-    {
-        return null;
-    }
     public static String insertchat(long time,int from,int isSingleCast,int to,int isFile,String msg)//插入聊天信息
     {
         String sql = "INSERT INTO CHAT (POSTTIME,FROMUSER,ISSINGLECAST,TOUSER,ISFILE,MESSAGE) VALUES ("+time+","+from+","+isSingleCast+","+to+","+isFile+",'"+msg+"');";
@@ -70,16 +66,15 @@ public class SqlString {
         String sql = "SELECT USER.ID FROM USER WHERE USER.ID IN (SELECT RELATION.FIRSTID FROM RELATION WHERE RELATION.SECONDID = "+id+") AND USER.ISONLINE = 1;";
         return sql;
     }
+    public static String selectgroupinfo(int id)
+    {
+        String sql = "SELECT * FROM USER WHERE USER.ID = "+id+";";
+        return sql;
+    }
     public static String isuserexist(int id)//判断某个用户是否存在
     {
         String sql = "SELECT USER.ID FROM USER WHERE USER.ID = "+id+";";
         return sql;
-    }
-
-    public static void main(String[] args)
-    {
-        //System.out.println(SqlString.insertchat(2,0,1,0,"nihao a"));
-        System.out.println(SqlString.updateuser(2,"MIKE",0));
     }
 }
 
