@@ -76,9 +76,11 @@ public class UserClient {
                         SqlExec.addSql(SqlString.updateuser(Integer.parseInt(msg[1]),0));
                         JUtils.updateuser(msg);
                     }
-                    else if(msg[0].equals("addgroup"))
+                    else if(msg[0].equals("group"))
                     {
-
+                        //group::fromid::toid::isfile::msg::time
+                        SqlExec.addSql(SqlString.insertchat(Long.parseLong(msg[5]),Integer.parseInt(msg[1]),0,Integer.parseInt(msg[2]),Integer.parseInt(msg[3]),msg[4]));
+                        JUtils.addgroupchat(msg[5]+"::"+msg[1]+"::0::"+msg[2]+"::"+msg[3]+"::"+msg[4]);
                     }
                     else if(msg[0].equals("adduser"))
                     {
@@ -131,11 +133,12 @@ public class UserClient {
              **/
             if(msg[0].equals("upload"))//上传文件
             {
-                //upload::toid::filename::path
+                //upload::toid::filename::path::issingle
                 Long t = new Date().getTime();
                 SqlExec.addSql(SqlString.insertchat(t,userid,1,Integer.parseInt(msg[1]),1,msg[2]));
-                JUtils.addchat(t+"::"+userid+"::1::"+msg[1]+"::1::"+msg[2]);
-                dout.writeUTF(msg[0]+"::"+msg[1]+"::"+msg[2]+"::"+t);//upload::toid::filename::time
+                JUtils.addchat(t+"::"+userid+"::"+msg[4]+"::"+msg[1]+"::1::"+msg[2]);
+                dout.writeUTF(msg[0]+"::"+msg[1]+"::"+msg[2]+"::"+t+"::"+msg[4]);//upload::toid::filename::time::issingle
+                dout.flush();
                 new FileClient(msg[0]+"::"+userid+"::"+msg[3]+"::"+msg[2]);//upload::fromid::path::filename
             }
             else if(msg[0].equals("download"))//下载文件
@@ -144,9 +147,30 @@ public class UserClient {
                 //msgout  download::fromid::filename
                 new FileClient(msgout+"::"+userid);
             }
+            else if(msg[0].equals("buildgroup"))
+            {
+                //buildgroup::groupid::groupname
+                SqlExec.addSql(SqlString.insertuser(Integer.parseInt(msg[1]),msg[2],0,1));
+                dout.writeUTF(msgout);
+                dout.flush();
+            }
             else if(msg[0].equals("addgroup"))
             {
-                //addgroup::groupid::groupname
+                //addgroup::groupid
+                SqlExec.addSql(SqlString.insertrelation(userid,Integer.parseInt(msg[1])));
+                dout.writeUTF(msgout);
+                dout.flush();
+            }
+            else if(msg[0].equals("group"))
+            {
+                //接收group::groupid::msg
+                //发送group::groupid::msg::time
+                System.out.println("群消息发送成功:"+msgout);
+                Long t = new Date().getTime();
+                SqlExec.addSql(SqlString.insertchat(t,userid,0,Integer.parseInt(msg[1]),0,msg[2]));
+                JUtils.addgroupchat(t+"::"+userid+"::0::"+msg[1]+"::0::"+msg[2]);
+                dout.writeUTF(msgout+"::"+t);
+                dout.flush();
             }
             else if(msg[0].equals("adduser"))
             {

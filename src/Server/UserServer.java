@@ -93,10 +93,18 @@ class Client extends Thread
                 if (msg[0].equals("upload")) {
                     //要求向服务器上传文件
                     //无论给谁发，都加到个人仓库
-                    //upload::toid::filename::time
-                    SqlExec.addSql(SqlString.insertchat(Long.parseLong(msg[3]),userid , 1, Integer.parseInt(msg[1]), 1, msg[2]));
-                    if ((toClient = UserServer.socklist.get(Integer.parseInt(msg[1]))) != null) {
-                        toClient.sendMsg("upload::"+userid + "::" + msg[2]+"::"+msg[3]);
+                    //upload::toid::filename::time::issingle
+                    SqlExec.addSql(SqlString.insertchat(Long.parseLong(msg[3]),userid , Integer.parseInt(msg[4]), Integer.parseInt(msg[1]), 1, msg[2]));
+                    //group::fromid::toid::isfile::msg::time
+                    if(msg[4].equals("1"))
+                    {
+                        if ((toClient = UserServer.socklist.get(Integer.parseInt(msg[1]))) != null) {
+                            toClient.sendMsg("upload::"+userid + "::" + msg[2]+"::"+msg[3]);
+                        }
+                    }
+                    else
+                    {
+                        sendGroupMsg("group::"+userid+"::"+msg[1]+"::1::"+msg[2]+"::"+msg[3]);
                     }
                 } else if (msg[0].equals("download")) {
                     //要求从服务器下载文件
@@ -145,7 +153,9 @@ class Client extends Thread
 
                 }else if(msg[0].equals("group"))
                 {
-                    //group::fromid::msg::time
+                    //group::groupid::msg::time
+                    SqlExec.addSql(SqlString.insertchat(Long.parseLong(msg[3]),userid,0,Integer.parseInt(msg[1]),0,msg[2]));
+                    sendGroupMsg("group::"+userid+"::"+msg[1]+"::0::"+msg[2]+"::"+msg[3]);//group::fromid::toid::isfile::msg::time
                 } else{
                     //给用户发送消息
                     //userid::message::time
@@ -164,8 +174,44 @@ class Client extends Thread
             //e.printStackTrace();
         }
     }
+    public void sendGroupMsg(String msg1)
+    {
+        //group::fromid::toid::isfile::msg::time
+        String[] msg = msg1.split("::");
+        ResultSet rs = null;
+        //群发消息
+        rs = SqlExec.Select(SqlString.selectonlinegroupuser(Integer.parseInt(msg[2])));
+        try {
+            //group::fromid::toid::isfile::msg::time
+            while(rs.next())
+            {
+                //id
+                if(rs.getInt(1)==userid){continue;}
+                if ((toClient = UserServer.socklist.get(rs.getInt(1))) != null) {
+                    toClient.sendMsg(msg1);
+                }
+            }
+        }catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
     public void syncGroupMsg(int groupid)
     {
+        ResultSet rs = null;
+        //同步聊天记录
+        rs = SqlExec.Select(SqlString.selectchat(groupid));
+        try {
+            //group::fromid::toid::isfile::msg::time
+            while(rs.next())
+            {
+                dout.writeUTF("group::"+rs.getInt(2)+"::"+groupid+"::"+rs.getInt(5)+"::"+rs.getString(6)+"::"+rs.getLong(1));
+                dout.flush();
+            }
+        }catch (SQLException | IOException e)
+        {
+            e.printStackTrace();
+        }
 
     }
     public void sendMsg(String msg){//给指定用户发消息

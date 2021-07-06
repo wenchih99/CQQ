@@ -65,6 +65,11 @@ public class SqlString {
         String sql = "SELECT USER.ID FROM USER WHERE USER.ID IN (SELECT RELATION.SECONDID FROM RELATION WHERE RELATION.FIRSTID = "+id+") AND USER.ISONLINE = 1;";
         return sql;
     }
+    public static String selectonlinegroupuser(int id)//给该群的在线好友发消息
+    {
+        String sql = "SELECT USER.ID FROM USER WHERE USER.ID IN (SELECT RELATION.FIRSTID FROM RELATION WHERE RELATION.SECONDID = "+id+") AND USER.ISONLINE = 1;";
+        return sql;
+    }
     public static String isuserexist(int id)//判断某个用户是否存在
     {
         String sql = "SELECT USER.ID FROM USER WHERE USER.ID = "+id+";";

@@ -58,6 +58,53 @@ public class JUtils {
         QQDemo.me.jS2.getViewport().setViewPosition(new Point(0,QQDemo.me.jSb.getMaximum()));
         QQDemo.me.panel.validate();
     }
+    public static void addgroupchat(String message)
+    {
+        //time::fromid::issingle::toid::isfile::msg
+        //group::fromid::toid::isfile::msg::time
+        String[] msg = message.split("::");
+        if(QQDemo.nowid!=Integer.parseInt(msg[3])){return;}
+        JButton jb=null;
+        if(msg[4].equals("1"))//是否为文件
+        {
+            jb = new JButton("文件下载");
+            final String fromid = msg[1];
+            final String filename = msg[5];
+            jb.setSize(200, 30);
+            jb.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    QQDemo.me.client.msgout = "download::" + fromid + "::" + filename;
+                    QQDemo.me.client.SendMsg();
+                }
+            });
+        }
+        if(Integer.parseInt(msg[1])!=QQDemo.me.userid)
+        {
+            QQDemo.me.panel.add(GUIutils.StringToJlabel(Long.parseLong(msg[0]),false));
+            QQDemo.me.panel.add(GUIutils.StringToJlabel(msg[5],false));
+            if(msg[4].equals("1"))//是否为文件
+            {
+                JPanel jPanel = new JPanel(new BorderLayout());
+                jPanel.add(jb,BorderLayout.WEST);
+                QQDemo.me.panel.add(jPanel);
+            }
+        }
+        else
+        {
+            QQDemo.me.panel.add(GUIutils.StringToJlabel(Long.parseLong(msg[0]),true));
+            QQDemo.me.panel.add(GUIutils.StringToJlabel(msg[1]+"::"+msg[5],true));
+            if(msg[4].equals("1"))//是否为文件
+            {
+                JPanel jPanel = new JPanel(new BorderLayout());
+                jPanel.add(jb,BorderLayout.EAST);
+                QQDemo.me.panel.add(jPanel);
+            }
+        }
+        QQDemo.me.panel.updateUI();
+        QQDemo.me.jS2.getViewport().setViewPosition(new Point(0,QQDemo.me.jSb.getMaximum()));
+        QQDemo.me.panel.validate();
+    }
     public static void updateuser(String[] msg)
     {
         if(msg[0].equals("online"))
@@ -115,7 +162,7 @@ public class JUtils {
     }
     public static void SelectFriendInfo(int userid)
     {
-        //name::id::issingle::isonline
+        //name::id::issingle
         ResultSet rs = SqlExec.Select(SqlString.selectuser(userid));
         QQDemo.me.friends.clear();
         try {

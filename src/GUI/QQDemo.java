@@ -28,11 +28,11 @@ public class QQDemo extends JFrame{
     public String username;
     public JLabel label_name,label_isonline,label_issingle;
     public JButton bt_sendmsg,bt_sendfile;
-    public JButton deluser,adduser,modifyname,addgroup;
+    public JButton deluser,adduser,modifyname,addgroup,buildgroup;
     public JScrollPane jS1,jS2,jS3;
     public JScrollBar jSb;
     public JPanel panel;
-    public JTextField text_common;
+    public JTextField text_common,text_groupid,text_groupname;
     public JTextArea text_send;
     public JList<String> list_friend;
     public Hashtable<String,String> friends;//<name,id::issingle::isonline>
@@ -77,6 +77,11 @@ public class QQDemo extends JFrame{
         text_common=new JTextField(30);
         text_common.setBounds(120,5,100,30);
 
+        text_groupid=new JTextField("群id",30);
+        text_groupid.setBounds(235,550,100,30);
+        text_groupname=new JTextField("群名称",30);
+        text_groupname.setBounds(345,550,100,30);
+
         bt_sendmsg=new JButton("发送消息");
         bt_sendmsg.setBounds(580, 550, 100, 30 );
 
@@ -91,6 +96,8 @@ public class QQDemo extends JFrame{
         addgroup.setBounds(370,5,100,30);
         deluser = new JButton("删除好友");
         deluser.setBounds(15,550,100,30);
+        buildgroup=new JButton("创建群聊");
+        buildgroup.setBounds(455,550,100,30);
 
         bt_sendmsg.addActionListener(new ActionListener() {
             @Override
@@ -112,7 +119,14 @@ public class QQDemo extends JFrame{
                 {
                     //正常选择文件
                     File file = new File(fc.getSelectedFile().toString());
-                    client.msgout = "upload::"+nowid+"::"+file.getName()+"::"+fc.getSelectedFile().toString();
+                    if(label_issingle.getText().equals("single"))
+                    {
+                        client.msgout = "upload::"+nowid+"::"+file.getName()+"::"+fc.getSelectedFile().toString()+"::1";
+                    }
+                    else
+                    {
+                        client.msgout = "upload::"+nowid+"::"+file.getName()+"::"+fc.getSelectedFile().toString()+"::0";
+                    }
                     client.SendMsg();
                     bt_sendfile.validate();
                 }
@@ -208,12 +222,15 @@ public class QQDemo extends JFrame{
         container.add(addgroup);
         container.add(deluser);
         container.add(modifyname);
+        container.add(buildgroup);
         container.add(label_name);
         container.add(label_isonline);
         container.add(label_issingle);
         container.add(bt_sendfile);
         container.add(bt_sendmsg);
         container.add(text_common);
+        container.add(text_groupid);
+        container.add(text_groupname);
         container.add(jS1);
         container.add(jS2);
         container.add(jS3);
