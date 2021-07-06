@@ -28,11 +28,10 @@ public class QQDemo extends JFrame{
     public String username;
     public JLabel label_name,label_isonline,label_issingle;
     public JButton bt_sendmsg,bt_sendfile;
-    public JButton deluser,adduser,modifyname;
+    public JButton deluser,adduser,modifyname,addgroup;
     public JScrollPane jS1,jS2,jS3;
     public JScrollBar jSb;
     public JPanel panel;
-    public JTextField text_filepath;
     public JTextField text_common;
     public JTextArea text_send;
     public JList<String> list_friend;
@@ -40,6 +39,7 @@ public class QQDemo extends JFrame{
     public ArrayList<String> nowchat;//当前好友聊天信息,随用随从数据库中取
     public static int nowid;//当前聊天对象id
     public static String nowname;
+    public DefaultListModel<String> listModel;
     public QQDemo(int userid,String username) throws InterruptedException {
         super("CQQ聊天室");
         me=this;
@@ -51,10 +51,11 @@ public class QQDemo extends JFrame{
         int i=1;
         while(!SqlExec.sqlQueue.isEmpty())
         {
-            System.out.println(i++);
+            System.out.print(i++);
             continue;
         }
-        SelectFriendInfo();
+        System.out.print("\n");
+        JUtils.SelectFriendInfo(userid);
         GUIinit();
         //显示页面
         this.setSize(710,630);
@@ -73,9 +74,6 @@ public class QQDemo extends JFrame{
         label_isonline=new JLabel();
         label_isonline.setBounds(650,5,50,30);
 
-        text_filepath=new JTextField("文件路径",30);
-        text_filepath.setBounds(15,550,310,30);
-
         text_common=new JTextField(30);
         text_common.setBounds(120,5,100,30);
 
@@ -83,15 +81,16 @@ public class QQDemo extends JFrame{
         bt_sendmsg.setBounds(580, 550, 100, 30 );
 
         bt_sendfile = new JButton("发送文件");
-        bt_sendfile.setBounds(330, 550, 100, 30);
+        bt_sendfile.setBounds(125, 550, 100, 30);
 
         adduser = new JButton("添加好友");
         adduser.setBounds(480,5,100,30);
-        deluser = new JButton("删除好友");
-        deluser.setBounds(370,5,100,30);
         modifyname = new JButton("修改网名");
         modifyname.setBounds(260,5,100,30);
-
+        addgroup=new JButton("添加群组");
+        addgroup.setBounds(370,5,100,30);
+        deluser = new JButton("删除好友");
+        deluser.setBounds(15,550,100,30);
 
         bt_sendmsg.addActionListener(new ActionListener() {
             @Override
@@ -131,20 +130,33 @@ public class QQDemo extends JFrame{
                 adduser.validate();
             }
         });
+        addgroup.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
         deluser.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                friends.remove(nowname);
+                //先选中再删除
                 client.msgout="deleteuser::"+nowid;
                 client.SendMsg();
-                list_friend.setListData(friends.keySet().toArray(new String[0]));
-                list_friend.validate();
+                //本地删除好友直接在这删除了
+                String msg = "deleteuser::"+nowid+"::"+nowname;
+                JUtils.updateuser(msg.split("::"));
             }
         });
         modifyname.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                String msg=text_common.getText();
+                text_common.setText("");
+                if(msg.equals("")){System.out.println("空消息！");return;}
+                client.msgout="updateusername::"+msg;
+                client.SendMsg();
+                label_name.setText("网名:"+msg);
+                label_name.validate();
             }
         });
 
@@ -152,7 +164,12 @@ public class QQDemo extends JFrame{
         list_friend=new JList<String>();
         list_friend.setPreferredSize(new Dimension(150, 100));
         list_friend.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        list_friend.setListData(friends.keySet().toArray(new String[0]));
+        listModel = new DefaultListModel<String>();
+        for(String r:friends.keySet())
+        {
+            listModel.addElement(r);
+        }
+        list_friend.setModel(listModel);
         list_friend.setSelectedIndex(-1);
         list_friend.addListSelectionListener(new ListSelectionListener() {
             @Override
@@ -160,6 +177,7 @@ public class QQDemo extends JFrame{
                 if(e.getValueIsAdjusting()) { return; }//只有在鼠标放开的时候才可以
                 // 获取被选中的选项索引
                 int k = list_friend.getSelectedIndex();
+                if(k<0){return;}
                 // 获取选项数据的 ListModel
                 ListModel<String> listModel = list_friend.getModel();
                 // 输出选中的选项
@@ -170,7 +188,6 @@ public class QQDemo extends JFrame{
         });
         jS1=new JScrollPane(list_friend);
         jS1.setBounds(15,45,165,485);
-        list_friend.add("nishi",new JLabel("hahaha"));
 
         //聊天记录
         panel = new JPanel();
@@ -188,6 +205,7 @@ public class QQDemo extends JFrame{
         Container container=this.getContentPane();
         container.setLayout(null);
         container.add(adduser);
+        container.add(addgroup);
         container.add(deluser);
         container.add(modifyname);
         container.add(label_name);
@@ -195,36 +213,29 @@ public class QQDemo extends JFrame{
         container.add(label_issingle);
         container.add(bt_sendfile);
         container.add(bt_sendmsg);
-        container.add(text_filepath);
         container.add(text_common);
         container.add(jS1);
         container.add(jS2);
         container.add(jS3);
     }
-    public void SelectFriendInfo()
-    {
-        ResultSet rs = SqlExec.Select(SqlString.selectuser(userid));
-        friends.clear();
-        try {
-            while(rs.next())
-            {
-                friends.put(rs.getString(2),rs.getInt(1)+"::"+rs.getInt(3)+"::"+rs.getInt(4));
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-    private void SelectChat(String message)
+    public void SelectChat(String message)
     {
         //id::issingle::isonline
         String[] msg = message.split("::");
         nowid = Integer.parseInt(msg[1]);
         if(nowid==1){label_issingle.setText("single");}
         else{label_issingle.setText("group");}
-        nowid = Integer.parseInt(msg[2]);
-        if(nowid==1){label_isonline.setText("online");}
-        else{label_isonline.setText("offline");}
         nowid = Integer.parseInt(msg[0]);
+        if(SqlExec.isOnline(SqlString.isuseronline(nowid)))
+        {
+            label_isonline.setText("online");
+            label_isonline.setForeground(Color.GREEN);
+        }
+        else
+        {
+            label_isonline.setText("offline");
+            label_isonline.setForeground(Color.RED);
+        }
 
         ResultSet rs = SqlExec.Select(SqlString.selectchat(nowid));
         nowchat = new ArrayList<>();
@@ -280,5 +291,6 @@ public class QQDemo extends JFrame{
             }
         }
         panel.updateUI();
+        panel.validate();
     }
 }

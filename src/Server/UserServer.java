@@ -59,6 +59,7 @@ class Client extends Thread
             dout = new DataOutputStream(socket.getOutputStream());
             userid = din.readInt();
             username = din.readUTF();//设置当前用户名
+            sendmodifynamemsg();
             System.out.println("user:"+userid+" is on line!");
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,7 +95,7 @@ class Client extends Thread
                     //无论给谁发，都加到个人仓库
                     //upload::toid::filename::time
                     SqlExec.addSql(SqlString.insertchat(Long.parseLong(msg[3]),userid , 1, Integer.parseInt(msg[1]), 1, msg[2]));
-                    if ((toClient = UserServer.socklist.get(Integer.parseInt(msg[0]))) != null) {
+                    if ((toClient = UserServer.socklist.get(Integer.parseInt(msg[1]))) != null) {
                         toClient.sendMsg("upload::"+userid + "::" + msg[2]+"::"+msg[3]);
                     }
                 } else if (msg[0].equals("download")) {
@@ -120,16 +121,32 @@ class Client extends Thread
                     SqlExec.addSql(SqlString.deleterelation(userid, Integer.parseInt(msg[1])));
                     SqlExec.addSql(SqlString.deleterelation(Integer.parseInt(msg[1]), userid));
                     if ((toClient = UserServer.socklist.get(Integer.parseInt(msg[1]))) != null) {
+                        //deleteuser::userid::username
                         toClient.sendMsg(msg[0] + "::" + userid+"::"+username);
                     }
+                }else if(msg[0].equals("buildgroup"))
+                {
+                    //buildgroup::id::name
+                    SqlExec.addSql(SqlString.insertuser(Integer.parseInt(msg[1]),msg[2],0,1));
+                } else if(msg[0].equals("addgroup"))
+                {
+                    //addgroup::id
+                    SqlExec.addSql(SqlString.insertrelation(userid, Integer.parseInt(msg[1])));
+                    syncGroupMsg(Integer.parseInt(msg[1]));//同步群消息
                 } else if (msg[0].equals("updateusername")) {
                     //更新用户名称
-                    //updateusername::username
-
+                    //接收updateusername::username
+                    //发送updateusername::username::id
+                    username=msg[1];
+                    SqlExec.addSql(SqlString.updateuser(userid,username));
+                    sendmodifynamemsg();
                 } else if (msg[0].equals("updatedb")) {
                     //同步更新数据库
 
-                } else {
+                }else if(msg[0].equals("group"))
+                {
+                    //group::fromid::msg::time
+                } else{
                     //给用户发送消息
                     //userid::message::time
                     SqlExec.addSql(SqlString.insertchat(Long.parseLong(msg[2]), userid, 1, Integer.parseInt(msg[0]), 0, msg[1]));
@@ -137,9 +154,6 @@ class Client extends Thread
                         toClient.sendMsg(userid + "::" + msg[1]+"::"+msg[2]);
                     }
                 }
-                    //向组发送消息
-
-
             }
         } catch (IOException e) {
             //如果报错,则该用户下线
@@ -149,6 +163,10 @@ class Client extends Thread
             SqlExec.addSql(SqlString.updateuser(userid,username,0));
             //e.printStackTrace();
         }
+    }
+    public void syncGroupMsg(int groupid)
+    {
+
     }
     public void sendMsg(String msg){//给指定用户发消息
         try
@@ -234,6 +252,7 @@ class Client extends Thread
     }
     public void sendonlinemsg()
     {
+        //online::id
         ResultSet rs = null;
         //发送在线消息
         rs = SqlExec.Select(SqlString.selectonlineuser(userid));
@@ -252,6 +271,7 @@ class Client extends Thread
     }
     public void sendofflinemsg()
     {
+        //offline::id
         ResultSet rs = null;
         //发送离线消息
         rs = SqlExec.Select(SqlString.selectonlineuser(userid));
@@ -260,6 +280,24 @@ class Client extends Thread
             {
                 if ((toClient = UserServer.socklist.get(rs.getInt(1))) != null) {
                     toClient.sendMsg("offline::" + userid);
+                }
+            }
+        }catch (SQLException  e)
+        {
+            e.printStackTrace();
+        }
+    }
+    public void sendmodifynamemsg()
+    {
+        //updateusername::username::id
+        ResultSet rs = null;
+        //发送离线消息
+        rs = SqlExec.Select(SqlString.selectonlineuser(userid));
+        try {
+            while(rs.next())
+            {
+                if ((toClient = UserServer.socklist.get(rs.getInt(1))) != null) {
+                    toClient.sendMsg("updateusername::" +username+"::"+ userid);
                 }
             }
         }catch (SQLException  e)

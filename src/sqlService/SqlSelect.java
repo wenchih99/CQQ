@@ -43,6 +43,7 @@ public class SqlSelect {
         }
         return flag;
     }
+
     public static void main(String[] args)
     {
         SqlSelect.Select(SqlString.selectchat(12),0);

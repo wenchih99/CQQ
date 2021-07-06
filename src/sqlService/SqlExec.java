@@ -32,7 +32,7 @@ public class SqlExec extends Thread{
         {
             if(sqlQueue.isEmpty()){
                 try {
-                    sleep(1000);
+                    sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -66,6 +66,24 @@ public class SqlExec extends Thread{
         try {
             rs = stmt.executeQuery(sql);
             if(rs.next()){flag=true;};
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return flag;
+    }
+    public static boolean isOnline(String sql)
+    {
+        boolean flag = false;
+        try {
+            rs = stmt.executeQuery(sql);
+            while(rs.next())
+            {
+                if(rs.getInt(1)==1)
+                {
+                    flag=true;
+                }
+            }
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

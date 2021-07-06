@@ -20,6 +20,11 @@ public class SqlString {
         String sql = "INSERT INTO CHAT (POSTTIME,FROMUSER,ISSINGLECAST,TOUSER,ISFILE,MESSAGE) VALUES ("+time+","+from+","+isSingleCast+","+to+","+isFile+",'"+msg+"');";
         return sql;
     }
+    public static String updateuser(int id,String name)
+    {
+        String sql = "UPDATE USER SET NAME='"+name+"' WHERE USER.ID = "+id+";";
+        return sql;
+    }
     public static String updateuser(int id,String name,int onLine)//更新用户信息
     {
         String sql = "UPDATE USER SET NAME='"+name+"',ISONLINE="+onLine+" WHERE USER.ID = "+id+";";
@@ -48,6 +53,11 @@ public class SqlString {
     public static String selectuser(int id)//筛选指定用户的好友的信息
     {
         String sql = "SELECT * FROM USER WHERE USER.ID IN (SELECT RELATION.SECONDID FROM RELATION WHERE RELATION.FIRSTID = "+id+");";
+        return sql;
+    }
+    public static String isuseronline(int id)//某用户是否在线
+    {
+        String sql = "SELECT USER.ISONLINE FROM USER WHERE USER.ID = "+id+";";
         return sql;
     }
     public static String selectonlineuser(int id)//给该用户的在线好友发消息

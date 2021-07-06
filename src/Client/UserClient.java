@@ -43,7 +43,6 @@ public class UserClient {
         new InitDB("client");//初始化DB
         DBSync();//与服务器进行同步
         new RecvMsg().start();//启动接收消息线程
-        //new SendMsg().start();//启动发送消息线程
     }
     class RecvMsg extends Thread
     {//接受消息线程
@@ -59,7 +58,7 @@ public class UserClient {
                     if(msg[0].equals("upload"))//上传文件
                     {
                         //upload::fromid::filename::time
-                        SqlExec.addSql(SqlString.insertchat(Integer.parseInt(msg[3]),Integer.parseInt(msg[1]),1,userid,1,msg[2]));
+                        SqlExec.addSql(SqlString.insertchat(Long.parseLong(msg[3]),Integer.parseInt(msg[1]),1,userid,1,msg[2]));
                         JUtils.addchat(msg[3]+"::"+msg[1]+"::1::"+userid+"::1::"+msg[2]);
                     }
                     else if(msg[0].equals("download"))//下载文件
@@ -68,13 +67,14 @@ public class UserClient {
                     }
                     else if(msg[0].equals("online"))
                     {
+                        //online::id
                         SqlExec.addSql(SqlString.updateuser(Integer.parseInt(msg[1]),1));
-                        QQDemo.me.SelectFriendInfo();
+                        JUtils.updateuser(msg);
                     }
                     else if(msg[0].equals("offline"))
                     {
                         SqlExec.addSql(SqlString.updateuser(Integer.parseInt(msg[1]),0));
-                        QQDemo.me.SelectFriendInfo();
+                        JUtils.updateuser(msg);
                     }
                     else if(msg[0].equals("addgroup"))
                     {
@@ -82,18 +82,28 @@ public class UserClient {
                     }
                     else if(msg[0].equals("adduser"))
                     {
+                        //adduser::id::name
                         SqlExec.addSql(SqlString.insertrelation(userid,Integer.parseInt(msg[1])));
                         SqlExec.addSql(SqlString.insertuser(Integer.parseInt(msg[1]),msg[2],1,1));
-                        JUtils.adduser(msg[2]+"::"+msg[1]+"::1::1");
+                        JUtils.updateuser(msg);
                     }
                     else if(msg[0].equals("deleteuser"))
                     {
+                        //deleteuser::id::name
                         SqlExec.addSql(SqlString.deleterelation(userid,Integer.parseInt(msg[1])));
-                        JUtils.addchat(msg[2]);
+                        JUtils.updateuser(msg);
                     }
                     else if(msg[0].equals("updateusername"))
                     {
-
+                        //updateusername::username::id
+                        SqlExec.addSql(SqlString.updateuser(Integer.parseInt(msg[2]),msg[1]));
+                        try {
+                            sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        JUtils.updateuser(msg);
+                        //更新全部列表
                     }
                     else if(msg[0].equals("updatedb"))
                     {
@@ -136,7 +146,7 @@ public class UserClient {
             }
             else if(msg[0].equals("addgroup"))
             {
-
+                //addgroup::groupid::groupname
             }
             else if(msg[0].equals("adduser"))
             {
@@ -147,13 +157,14 @@ public class UserClient {
             else if(msg[0].equals("deleteuser"))
             {
                 SqlExec.addSql(SqlString.deleterelation(userid,Integer.parseInt(msg[1])));
-                //JUtils.deleteuser(msg[1]);
                 dout.writeUTF(msgout);
                 dout.flush();
             }
             else if(msg[0].equals("updateusername"))
             {
-
+                //updateusername::name
+                dout.writeUTF(msgout);
+                dout.flush();
             }
             else if(msg[0].equals("updatedb"))
             {
@@ -175,76 +186,6 @@ public class UserClient {
             e.printStackTrace();
         }
     }
-//    class SendMsg extends Thread
-//    {//发送消息线程
-//        public void run()
-//        {
-//            System.out.println("发送消息线程启动成功！");
-//            String[] msg;
-//            try {
-//                while(true)
-//                {
-//                    //msgout=sc.nextLine();
-//                    //System.out.println(msgout);
-//                    //if(msgout.equals("")) { System.out.println(new Date());continue; }//防止发送空消息
-//                    msg = msgout.split("::");
-//                    /*
-//                    **/
-//                    if(msg[0].equals("upload"))//上传文件
-//                    {
-//                        //upload::toid::filename::path
-//                        Long t = new Date().getTime();
-//                        SqlExec.addSql(SqlString.insertchat(t,userid,1,Integer.parseInt(msg[1]),1,msg[2]));
-//                        dout.writeUTF(msg[0]+"::"+msg[1]+"::"+msg[2]+"::"+t);//upload::toid::filename::time
-//                        new FileClient(msg[0]+"::"+userid+"::"+msg[3]+"::"+msg[2]);//upload::fromid::path::filename
-//                    }
-//                    else if(msg[0].equals("download"))//下载文件
-//                    {
-//                        //download::fromid::filename::localid
-//                        //dout.writeUTF(msgout);//download::fromid::filename
-//                        new FileClient(msgout+"::"+userid);
-//                    }
-//                    else if(msg[0].equals("addgroup"))
-//                    {
-//
-//                    }
-//                    else if(msg[0].equals("adduser"))
-//                    {
-//                        SqlExec.addSql(SqlString.insertrelation(userid,Integer.parseInt(msg[1])));
-//                        dout.writeUTF(msgout);
-//                        dout.flush();
-//                    }
-//                    else if(msg[0].equals("deleteuser"))
-//                    {
-//                        SqlExec.addSql(SqlString.deleterelation(userid,Integer.parseInt(msg[1])));
-//                        dout.writeUTF(msgout);
-//                        dout.flush();
-//                    }
-//                    else if(msg[0].equals("updateusername"))
-//                    {
-//
-//                    }
-//                    else if(msg[0].equals("updatedb"))
-//                    {
-//
-//                    }
-//                    else if(!msg[0].equals(""))
-//                    {
-//                        /*先发送消息，再更新本地数据库*/
-//                        /*toid::msg*/
-//                        System.out.println("消息发送成功:"+msgout);
-//                        Long t = new Date().getTime();
-//                        SqlExec.addSql(SqlString.insertchat(t,userid,1,Integer.parseInt(msg[0]),0,msg[1]));
-//                        dout.writeUTF(msgout+"::"+t);
-//                        dout.flush();
-//                    }
-//                    msgout="";
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
     public void DBSync()
     {
         int msg;
