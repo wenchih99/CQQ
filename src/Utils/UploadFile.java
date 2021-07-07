@@ -33,7 +33,6 @@ public class UploadFile{
         }
         catch (IOException e)
         {
-            //run();
             e.printStackTrace();
         }
     }

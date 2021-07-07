@@ -63,10 +63,5 @@ public class Login extends JFrame {
     }
     public static void main(String[] args){
         new Login();
-//        try {
-//            new QQDemo(12,"jejeje");
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
     }
 }

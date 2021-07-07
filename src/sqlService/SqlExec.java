@@ -89,7 +89,4 @@ public class SqlExec extends Thread{
         }
         return flag;
     }
-    public static void main(String[] args)
-    {
-    }
 }

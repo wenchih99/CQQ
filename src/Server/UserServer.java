@@ -36,11 +36,6 @@ public class UserServer {
             }
         }
     }
-    public static void lsUsers()
-    {
-        //显示当前用户
-        System.out.println("okokokokok");
-    }
 }
 class Client extends Thread
 {
