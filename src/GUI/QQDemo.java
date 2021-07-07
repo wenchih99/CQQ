@@ -1,7 +1,6 @@
 package GUI;
 
 import Client.UserClient;
-import Utils.GUIutils;
 import Utils.SqlString;
 import sqlService.SqlExec;
 
@@ -300,43 +299,11 @@ public class QQDemo extends JFrame{
         for(String e:nowchat)
         {
             msg = e.split("::");
-            JButton jb=null;
-            if(msg[4].equals("1"))//是否为文件
+            if(msg[2].equals("1"))
             {
-                jb = new JButton("文件下载");
-                final String fromid = msg[1];
-                final String filename = msg[5];
-                jb.setSize(200, 30);
-                jb.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        client.msgout = "download::" + fromid + "::" + filename;
-                        client.SendMsg();
-                    }
-                });
+                JUtils.addchat(e);
             }
-            if(Integer.parseInt(msg[1])==nowid)
-            {
-                panel.add(GUIutils.StringToJlabel(Long.parseLong(msg[0]),false));
-                panel.add(GUIutils.StringToJlabel(msg[5],false));
-                if(msg[4].equals("1"))//是否为文件
-                {
-                    JPanel jPanel = new JPanel(new BorderLayout());
-                    jPanel.add(jb,BorderLayout.WEST);
-                    panel.add(jPanel);
-                }
-            }
-            else
-            {
-                panel.add(GUIutils.StringToJlabel(Long.parseLong(msg[0]),true));
-                panel.add(GUIutils.StringToJlabel(msg[5],true));
-                if(msg[4].equals("1"))//是否为文件
-                {
-                    JPanel jPanel = new JPanel(new BorderLayout());
-                    jPanel.add(jb,BorderLayout.EAST);
-                    panel.add(jPanel);
-                }
-            }
+            else {JUtils.addgroupchat(e);}
         }
         panel.updateUI();
         panel.validate();

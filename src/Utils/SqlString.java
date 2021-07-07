@@ -51,6 +51,11 @@ public class SqlString {
         String sql = "SELECT * FROM USER WHERE USER.ID IN (SELECT RELATION.SECONDID FROM RELATION WHERE RELATION.FIRSTID = "+id+");";
         return sql;
     }
+    public static String selectgroup(int id)//筛选该用户的群
+    {
+        String sql = "SELECT ID FROM USER WHERE USER.ID IN (SELECT RELATION.SECONDID FROM RELATION WHERE RELATION.FIRSTID = "+id+") AND USER.ISSINGLE = 0;";
+        return sql;
+    }
     public static String isuseronline(int id)//某用户是否在线
     {
         String sql = "SELECT USER.ISONLINE FROM USER WHERE USER.ID = "+id+";";
@@ -66,7 +71,7 @@ public class SqlString {
         String sql = "SELECT USER.ID FROM USER WHERE USER.ID IN (SELECT RELATION.FIRSTID FROM RELATION WHERE RELATION.SECONDID = "+id+") AND USER.ISONLINE = 1;";
         return sql;
     }
-    public static String selectgroupinfo(int id)
+    public static String selectgroupinfo(int id)//筛选群组信息
     {
         String sql = "SELECT * FROM USER WHERE USER.ID = "+id+";";
         return sql;

@@ -246,28 +246,44 @@ class Client extends Thread
          * 三、该用户好友的信息
          * */
         ResultSet rs = null;
-        //同步聊天记录
-        rs = SqlExec.Select(SqlString.selectchat(userid));
-        while(true)
-        {
-            try {
-                if(!rs.next())
-                {
-                    dout.writeInt(0);//已结束
-                    break;
-                }
-                else{dout.writeInt(-1);}
-                dout.writeLong(rs.getLong(1));//时间
-                dout.writeInt(rs.getInt(2));//from
-                dout.writeInt(rs.getInt(3));//是否单聊
-                dout.writeInt(rs.getInt(4));//to
-                dout.writeInt(rs.getInt(5));//是否为文件
-                dout.writeUTF(rs.getString(6));//消息或路径
-                dout.flush();
-            }catch (SQLException | IOException e)
+        ArrayList<Integer> user=new ArrayList<>();
+        user.add(userid);
+        rs = SqlExec.Select(SqlString.selectgroup(userid));
+        try {
+            while(rs.next())
             {
-                e.printStackTrace();
+                user.add(rs.getInt(1));
             }
+        }catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        //同步聊天记录
+        for(int e:user)
+        {
+            rs = SqlExec.Select(SqlString.selectchat(e));
+            try {
+                while(rs.next())
+                {
+                    dout.writeInt(-1);
+                    dout.writeLong(rs.getLong(1));//时间
+                    dout.writeInt(rs.getInt(2));//from
+                    dout.writeInt(rs.getInt(3));//是否单聊
+                    dout.writeInt(rs.getInt(4));//to
+                    dout.writeInt(rs.getInt(5));//是否为文件
+                    dout.writeUTF(rs.getString(6));//消息或路径
+                    dout.flush();
+                }
+            }catch (SQLException | IOException lpp)
+            {
+                lpp.printStackTrace();
+            }
+        }
+        try {
+            dout.writeInt(0);//已结束
+            dout.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         //同步好友列表
         rs = SqlExec.Select(SqlString.selectrelation(userid));
@@ -310,6 +326,7 @@ class Client extends Thread
             }
         }
         System.out.println("数据库同步完成！！！");
+
     }
     public void sendonlinemsg()
     {
